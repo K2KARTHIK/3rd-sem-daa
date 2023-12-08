@@ -1,0 +1,200 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#define MAX_EDGES 100
+
+struct priorq {
+    char data;
+    int freq;
+};
+
+struct node {
+    struct node* left;
+    char data;
+    int freq;
+    struct node* right;
+};
+
+int rear = -1;
+struct priorq pq[MAX_EDGES];
+
+int isempty();
+int isfull();
+void insert(int freq, char data);
+int gethighestpriority();
+void deletehighestpriority(int a);
+struct node* createnewnode(int a, char c);
+int isLeaf(struct node* node);
+void printHCodes(struct node* root, int arr[], int top);
+void printArray(int arr[], int n);
+
+int main() {
+    struct node* hf[MAX_EDGES] = {NULL}; // Initialize hf array with NULL values
+    printf("Enter total number of distinct symbols to be encoded: ");
+    int n;
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        char c;
+        int p;
+        scanf(" %c %d", &c, &p);
+        insert(p, c);
+    }
+    int i = 0;
+    while (!isempty()) {
+        struct node* left = NULL;
+        struct node* right = NULL;
+
+        int k = gethighestpriority();
+        int r =pq[k].freq;
+        
+        if (k == -1){
+            break;
+        }
+        int flag = 0;
+        for (int j = 0; j < i; j++) {
+            if (pq[k].freq == hf[j]->freq && pq[k].data==hf[j]->data) {
+                flag = 1;
+                left = hf[j];
+                
+                break;
+            }
+        }
+
+        if (flag == 0){
+            left = createnewnode(pq[k].freq, pq[k].data);
+        }
+         deletehighestpriority(k);
+            
+        flag = 0;
+        int l = gethighestpriority();
+        if (l == -1){
+            break;
+        }
+         int d =pq[l].freq;
+        for (int j = 0; j < i; j++) {
+            if (pq[l].freq == hf[j]->freq && pq[l].data==hf[j]->data) {
+                flag = 1;
+                right = hf[j];
+            
+                break;
+            }
+        }
+        if (flag == 0){
+            right = createnewnode(pq[l].freq, pq[l].data);
+        }
+            deletehighestpriority(l);
+
+        struct node* root = createnewnode((r
+        +d), '\0');
+        root->left = left;
+        root->right = right;
+        hf[i++] = root;
+        insert(root->freq, '\0');
+    }
+    struct node* root = hf[i-1];
+    int arr[MAX_EDGES], top = 0;
+
+    printHCodes(root, arr, top);
+
+    return 0; // Indicate successful program execution
+}
+
+int isempty() {
+    return (rear == -1);
+}
+
+int isfull() {
+    return (rear == MAX_EDGES - 1);
+}
+
+void insert(int f, char d) {
+    if (isfull()) {
+        printf("Queue is full\n");
+        return;
+    }
+    rear = rear + 1;
+    pq[rear].freq = f;
+    pq[rear].data = d;
+}
+
+int gethighestpriority() {
+    if (isempty()) {
+        return -1;
+    }
+    int k=0;
+    /*for(int i=1;i<=rear;i++){
+        if(pq[i].data<pq[k].data && pq[i].freq<pq[k].freq){
+            k=i;
+        }
+    } */
+    
+    for (int i = 1; i <= rear; i++) {
+    if (pq[i].freq < pq[k].freq) {
+        k = i;
+    }
+}
+    return k;
+}
+
+void deletehighestpriority(int a) {
+    if (isempty()) {
+        printf("Queue is empty\n");
+        return;
+    }
+    if (a < rear) {
+        for (int j = a; j < rear; j++) {
+            pq[j] = pq[j + 1];
+        }
+    }
+    rear = rear - 1;
+}
+
+
+struct node* createnewnode(int a, char c) {
+  struct node* newn = (struct node*)malloc(sizeof(struct node));
+  if (newn == NULL) {
+    printf("Memory allocation failed\n");
+    exit(1);
+  }
+
+  newn->data = c;
+  newn->freq = a;
+  newn->left = NULL;
+  newn->right = NULL;
+
+  return newn;
+}
+void printHCodes(struct node* root, int arr[], int top) {
+    if (root == NULL) {
+        return;
+    }
+
+    if (isLeaf(root)) {
+        printf(" %c  | ", root->data);
+        printArray(arr, top);
+    }
+
+    if (root->left) {
+        arr[top] = 0;
+        printHCodes(root->left, arr, top + 1);
+    }
+
+    if (root->right) {
+        arr[top] = 1;
+        printHCodes(root->right, arr, top + 1);
+    }
+}
+
+int isLeaf(struct node* node) {
+    return !(node->left) && !(node->right);
+}
+
+
+
+void printArray(int arr[], int n) {
+    int i;
+    for (i = 0; i < n; ++i)
+        printf("%d", arr[i]);
+
+    printf("\n");
+}
