@@ -1,0 +1,47 @@
+// Implementing Karatsuba's Algorithm
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+// Function to perform Karatsuba multiplication
+int karatsuba(int x, int y, int n) 
+{
+    if (n == 1) return x * y;
+
+    int m = n / 2;
+
+    // Splitting the input numbers into two parts
+    int xh = x / (int)pow(10, m);
+    int xl = x % (int)pow(10, m);
+    int yh = y / (int)pow(10, m);
+    int yl = y % (int)pow(10, m);
+
+    // Recursive steps
+    int a = karatsuba(xh, yh, m);
+    int b = karatsuba(xl, yl, m);
+    int c = karatsuba(xh + xl, yh + yl, m) - a - b;
+
+    // Combine the results
+    return (a * (int)pow(10, 2 * m)) + (c * (int)pow(10, m)) + b;
+}
+
+int main() {
+    int x, y;
+
+    // Input two n-bit integers
+    printf("Enter the first n-bit integer: ");
+    scanf("%d", &x);
+
+    printf("Enter the second n-bit integer: ");
+    scanf("%d", &y);
+
+    // Calculate the product using Karatsuba algorithm
+    int n = log10(x) + 1;  // Assuming both x and y have the same number of digits
+    int result = karatsuba(x, y, n);
+
+    // Display the result
+    printf("Product: %d\n", result);
+
+    return 0;
+}
