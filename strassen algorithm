@@ -1,0 +1,131 @@
+// Implementing Strassen's Algorithm
+
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to add two matrices
+void matrixAddition(int n, int A[][n], int B[][n], int C[][n]) {
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            C[i][j] = A[i][j] + B[i][j];
+}
+
+// Function to subtract two matrices
+void matrixSubtraction(int n, int A[][n], int B[][n], int C[][n]) {
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            C[i][j] = A[i][j] - B[i][j];
+}
+
+// Function to multiply two matrices using the Strassen algorithm
+void strassen(int n, int A[][n], int B[][n], int C[][n]) {
+    if (n == 1) {
+        C[0][0] = A[0][0] * B[0][0];
+        return;
+    }
+
+    int newSize = n / 2;
+
+    // Submatrices of A
+    int A11[newSize][newSize], A12[newSize][newSize], A21[newSize][newSize], A22[newSize][newSize];
+
+    // Submatrices of B
+    int B11[newSize][newSize], B12[newSize][newSize], B21[newSize][newSize], B22[newSize][newSize];
+
+    // Submatrices of result
+    int C11[newSize][newSize], C12[newSize][newSize], C21[newSize][newSize], C22[newSize][newSize];
+
+    // Divide the matrices into submatrices
+    for (int i = 0; i < newSize; i++) {
+        for (int j = 0; j < newSize; j++) {
+            A11[i][j] = A[i][j];
+            A12[i][j] = A[i][j + newSize];
+            A21[i][j] = A[i + newSize][j];
+            A22[i][j] = A[i + newSize][j + newSize];
+
+            B11[i][j] = B[i][j];
+            B12[i][j] = B[i][j + newSize];
+            B21[i][j] = B[i + newSize][j];
+            B22[i][j] = B[i + newSize][j + newSize];
+        }
+    }
+
+    // Calculate the seven products (p1 to p7) required for Strassen algorithm
+    int P1[newSize][newSize], P2[newSize][newSize], P3[newSize][newSize], P4[newSize][newSize], P5[newSize][newSize], P6[newSize][newSize], P7[newSize][newSize];
+
+    matrixAddition(newSize, A11, A22, C11);
+    matrixAddition(newSize, B11, B22, C12);
+    matrixAddition(newSize, A21, A22, C21);
+    matrixSubtraction(newSize, B12, B22, C22);
+    matrixAddition(newSize, A11, A12, C21);
+    matrixSubtraction(newSize, B21, B11, C22);
+    matrixSubtraction(newSize, A12, A22, C11);
+    matrixAddition(newSize, B21, B22, C12);
+    matrixSubtraction(newSize, A11, A21, C11);
+    matrixAddition(newSize, B11, B12, C12);
+    matrixSubtraction(newSize, A12, A21, C21);
+    matrixAddition(newSize, B11, B12, C22);
+    
+    matrixAddition(newSize, A11, A12, P1);
+    matrixAddition(newSize, B11, B12, P2);
+    matrixSubtraction(newSize, A21, A11, P3);
+    matrixAddition(newSize, B11, B22, P4);
+    matrixSubtraction(newSize, A12, A22, P5);
+    matrixAddition(newSize, B21, B22, P6);
+    matrixSubtraction(newSize, A11, A21, P7);
+    matrixAddition(newSize, B11, B12, C21);
+    matrixAddition(newSize, A12, A22, C22);
+
+    // Combine the results into the result matrix
+    for (int i = 0; i < newSize; i++) {
+        for (int j = 0; j < newSize; j++) {
+            C[i][j] = C11[i][j];
+            C[i][j + newSize] = C12[i][j];
+            C[i + newSize][j] = C21[i][j];
+            C[i + newSize][j + newSize] = C22[i][j];
+        }
+    }
+}
+
+// Function to print a matrix
+void printMatrix(int n, int mat[][n]) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            printf("%d ", mat[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int n;
+
+    // Input the size of the matrices (assumed to be a power of 2 for simplicity)
+    printf("Enter the size of the matrices (power of 2): ");
+    scanf("%d", &n);
+
+    // Input the matrices A and B
+    int A[n][n], B[n][n];
+
+    printf("Enter the elements of matrix A:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &A[i][j]);
+
+    printf("Enter the elements of matrix B:\n");
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            scanf("%d", &B[i][j]);
+
+    // Initialize the result matrix C
+    int C[n][n];
+
+    // Perform matrix multiplication using the Strassen algorithm
+    strassen(n, A, B, C);
+
+    // Display the result matrix
+    printf("\nResult matrix C:\n");
+    printMatrix(n, C);
+
+    return 0;
+}
