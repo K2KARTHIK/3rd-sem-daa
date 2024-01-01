@@ -1,0 +1,103 @@
+// C program for RSA asymmetric cryptographic
+// algorithm. For demonstration values are
+// relatively small compared to practical
+// application
+
+#include <stdio.h>
+#include <math.h>
+
+//Returns gcd of and b
+int gcd(int a, int b)
+{
+    if (a==0) return b;
+    else return gcd(b%a,a);
+}
+
+// Returns gcd of a and b along with x and y value
+int gcd_ext(int a, int b, int* x, int* y)
+{
+    if (a==0)
+    {
+        *x=1;
+        *y=0;
+        return b;
+    }
+    
+    int x1, y1;
+    int c=gcd_ext(b%a,a,&x1,&y1);
+    
+    *x=y1;
+    *y=x1-(b/a)*(y1);
+    
+    return x1;
+}
+
+//Returns modInverse value
+int inverse(int a,int b)
+{
+    int x,y;
+    int g=gcd_ext(a,b,&x,&y);
+    
+    if (g!=1) return -1;
+    else return (y%b+b)%b;
+}
+
+//Returns modular exponentiation
+int pow_mod(int x, int y, int p)
+{
+    if (y==0) return 1;
+    
+	int res=pow_mod(x,y/2,p);
+
+	if (y%2==0) return (res*res)%p;
+	else return (res*res*x)%p;
+}
+
+// Code to demonstrate RSA algorithm
+int main()
+{
+	// Two random prime numbers
+
+	int p,q;
+	scanf("%d %d",&p,&q);
+
+	// First part of public key:
+	int n = p * q;
+
+	// Finding other part of public key.
+	// e stands for encrypt
+	int e = 2;
+	
+	int phi = (p - 1) * (q - 1);
+	
+	while (e < phi) {
+		// e must be co-prime to phi and
+		// smaller than phi.
+		int x,y;
+		int c=gcd(e,phi);
+		if (c == 1) break;
+		else e++;
+	}
+	
+	// Private key (d stands for decrypt)
+	// choosing d such that it satisfies
+	// it is the multiplicative inverse of e
+	int d = inverse(e,phi);
+
+
+	// Message to be encrypted
+	int msg;
+	scanf("%d",&msg);
+
+	printf("Message data = %d", msg);
+
+	// Encryption c = (msg ^ e) % n
+	int c = pow_mod(msg, e, n);
+	printf("\nEncrypted data = %d", c);
+
+	// Decryption m = (c ^ d) % n
+	int m = pow_mod(c, d, n);
+	printf("\nOriginal Message Sent = %d", m);
+
+	return 0;
+}
