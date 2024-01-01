@@ -1,0 +1,20 @@
+//Multiplication
+
+#include <stdio.h>
+
+int mult(int x, int y)
+{
+    if (y==0) return 0;
+    int z=mult(x,y/2);
+    if (y%2==0) return 2*z;
+    else return 2*z + x;
+}
+
+int main() 
+{
+    int x,y;
+    scanf("%d %d",&x,&y);
+    int c=mult(x,y);
+    printf("%d",c);
+    return 0;
+}
